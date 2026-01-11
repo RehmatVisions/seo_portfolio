@@ -1,4 +1,4 @@
-// Performance-optimized JavaScript with modern features
+// Optimized JavaScript with smooth form handling
 
 // Configuration
 const CONFIG = {
@@ -48,7 +48,7 @@ const throttle = (func, limit) => {
     }
 };
 
-// Enhanced typing animation with better performance
+// Enhanced typing animation
 function typeWriter() {
     const typingElement = document.querySelector('.typing-text');
     if (!typingElement) return;
@@ -77,14 +77,14 @@ function typeWriter() {
     state.animationId = setTimeout(typeWriter, typeSpeed);
 }
 
-// Optimized counter animation with Intersection Observer
+// Counter animation
 function animateCounters() {
     const counters = document.querySelectorAll('.stat-number');
     
     counters.forEach(counter => {
         const target = parseInt(counter.getAttribute('data-target'));
-        const duration = 2000; // 2 seconds
-        const increment = target / (duration / 16); // 60fps
+        const duration = 2000;
+        const increment = target / (duration / 16);
         let current = 0;
         
         const updateCounter = () => {
@@ -101,7 +101,7 @@ function animateCounters() {
     });
 }
 
-// Smooth scrolling with better performance
+// Smooth scrolling
 function initSmoothScrolling() {
     document.querySelectorAll('a[href^="#"]').forEach(anchor => {
         anchor.addEventListener('click', function (e) {
@@ -123,7 +123,7 @@ function initSmoothScrolling() {
     });
 }
 
-// Enhanced navigation scroll effect
+// Navigation effects
 function initNavigationEffects() {
     const nav = document.querySelector('.main-nav');
     if (!nav) return;
@@ -151,18 +151,15 @@ function initScrollAnimations() {
             if (entry.isIntersecting) {
                 entry.target.classList.add('animated');
                 
-                // Trigger counter animation for stats
                 if (entry.target.classList.contains('hero-stats')) {
                     animateCounters();
                 }
                 
-                // Unobserve after animation
                 observer.unobserve(entry.target);
             }
         });
     }, observerOptions);
     
-    // Observe elements for animation
     const animateElements = document.querySelectorAll('.hero-stats, .service-card, .skill-category, .case-study-card');
     animateElements.forEach(el => {
         el.classList.add('animate-on-scroll');
@@ -170,7 +167,7 @@ function initScrollAnimations() {
     });
 }
 
-// Mobile navigation toggle
+// Mobile navigation
 function initMobileNavigation() {
     const navToggle = document.querySelector('.nav-toggle');
     const navMenu = document.querySelector('.nav-menu');
@@ -182,7 +179,6 @@ function initMobileNavigation() {
         navToggle.classList.toggle('active');
     });
     
-    // Close menu when clicking on links
     navMenu.querySelectorAll('a').forEach(link => {
         link.addEventListener('click', () => {
             navMenu.classList.remove('active');
@@ -191,7 +187,7 @@ function initMobileNavigation() {
     });
 }
 
-// Form enhancement
+// Optimized form enhancements - no animation conflicts
 function initFormEnhancements() {
     const forms = document.querySelectorAll('form');
     
@@ -199,18 +195,18 @@ function initFormEnhancements() {
         const inputs = form.querySelectorAll('input, textarea, select');
         
         inputs.forEach(input => {
-            // Add floating label effect
-            input.addEventListener('focus', () => {
-                input.parentElement.classList.add('focused');
+            // Smooth focus effects without animation conflicts
+            input.addEventListener('focus', (e) => {
+                e.target.parentElement.classList.add('focused');
             });
             
-            input.addEventListener('blur', () => {
-                if (!input.value) {
-                    input.parentElement.classList.remove('focused');
+            input.addEventListener('blur', (e) => {
+                if (!e.target.value) {
+                    e.target.parentElement.classList.remove('focused');
                 }
             });
             
-            // Real-time validation
+            // Real-time validation with debounce
             input.addEventListener('input', debounce(() => {
                 validateField(input);
             }, 300));
@@ -227,10 +223,8 @@ function validateField(field) {
     const type = field.type;
     let isValid = true;
     
-    // Remove existing error states
     field.classList.remove('error', 'success');
     
-    // Validation rules
     if (field.hasAttribute('required') && !value) {
         isValid = false;
     } else if (type === 'email' && value) {
@@ -244,28 +238,76 @@ function validateField(field) {
         }
     }
     
-    // Apply visual feedback
     field.classList.add(isValid ? 'success' : 'error');
-    
     return isValid;
 }
 
+// WhatsApp form submission handler
+function handleWhatsAppFormSubmit(form, submitButton) {
+    const nameInput = form.querySelector('#name');
+    const emailInput = form.querySelector('#email');
+    
+    if (!validateField(nameInput) || !validateField(emailInput)) {
+        showNotification('Please fill in all required fields correctly.', 'error');
+        return;
+    }
+    
+    const formData = new FormData(form);
+    const name = formData.get('name');
+    const email = formData.get('email');
+    const website = formData.get('website') || 'Not provided';
+    const service = formData.get('service') || 'Not specified';
+    const message = formData.get('message') || 'No additional details provided';
+    
+    const whatsappMessage = `🌟 *New SEO Inquiry* 🌟
+
+👤 *Name:* ${name}
+📧 *Email:* ${email}
+🌐 *Website:* ${website}
+🎯 *Service Needed:* ${service}
+
+💬 *Message:*
+${message}
+
+---
+Sent from SEO Portfolio Website`;
+    
+    const encodedMessage = encodeURIComponent(whatsappMessage);
+    const whatsappNumber = '923224778268';
+    const whatsappURL = `https://wa.me/${whatsappNumber}?text=${encodedMessage}`;
+    
+    const originalText = submitButton.textContent;
+    submitButton.textContent = 'Opening WhatsApp...';
+    submitButton.disabled = true;
+    
+    window.open(whatsappURL, '_blank');
+    
+    setTimeout(() => {
+        showNotification('WhatsApp opened! Please send the message to complete your inquiry.', 'success');
+        form.reset();
+        
+        form.querySelectorAll('.form-group').forEach(group => {
+            group.classList.remove('focused');
+        });
+        
+        submitButton.textContent = originalText;
+        submitButton.disabled = false;
+    }, 1000);
+}
+
 // Form submission handler
-async function handleFormSubmit(e) {
+function handleFormSubmit(e) {
     e.preventDefault();
     
     const form = e.target;
     const submitButton = form.querySelector('button[type="submit"]');
     
-    // Check if this is the WhatsApp form
     if (form.id === 'whatsapp-form') {
         handleWhatsAppFormSubmit(form, submitButton);
         return;
     }
     
-    const formData = new FormData(form);
-    
-    // Validate all fields
+    // Default form handling for other forms
     const inputs = form.querySelectorAll('input[required], textarea[required]');
     let isFormValid = true;
     
@@ -280,91 +322,7 @@ async function handleFormSubmit(e) {
         return;
     }
     
-    // Show loading state
-    const originalText = submitButton.textContent;
-    submitButton.textContent = 'Sending...';
-    submitButton.disabled = true;
-    
-    try {
-        // Simulate form submission (replace with actual endpoint)
-        await new Promise(resolve => setTimeout(resolve, 1000));
-        
-        showNotification('Thank you! Your message has been sent successfully.', 'success');
-        form.reset();
-        
-        // Remove focused states
-        form.querySelectorAll('.form-group').forEach(group => {
-            group.classList.remove('focused');
-        });
-        
-    } catch (error) {
-        showNotification('Sorry, there was an error sending your message. Please try again.', 'error');
-    } finally {
-        submitButton.textContent = originalText;
-        submitButton.disabled = false;
-    }
-}
-
-// WhatsApp form submission handler
-function handleWhatsAppFormSubmit(form, submitButton) {
-    // Validate required fields
-    const nameInput = form.querySelector('#name');
-    const emailInput = form.querySelector('#email');
-    
-    if (!validateField(nameInput) || !validateField(emailInput)) {
-        showNotification('Please fill in all required fields correctly.', 'error');
-        return;
-    }
-    
-    // Get form data
-    const formData = new FormData(form);
-    const name = formData.get('name');
-    const email = formData.get('email');
-    const website = formData.get('website') || 'Not provided';
-    const service = formData.get('service') || 'Not specified';
-    const message = formData.get('message') || 'No additional details provided';
-    
-    // Format WhatsApp message
-    const whatsappMessage = `🌟 *New SEO Inquiry* 🌟
-
-👤 *Name:* ${name}
-📧 *Email:* ${email}
-🌐 *Website:* ${website}
-🎯 *Service Needed:* ${service}
-
-💬 *Message:*
-${message}
-
----
-Sent from SEO Portfolio Website`;
-    
-    // Encode message for URL
-    const encodedMessage = encodeURIComponent(whatsappMessage);
-    const whatsappNumber = '923224778268'; // Your WhatsApp number
-    const whatsappURL = `https://wa.me/${whatsappNumber}?text=${encodedMessage}`;
-    
-    // Show loading state
-    const originalText = submitButton.textContent;
-    submitButton.textContent = 'Opening WhatsApp...';
-    submitButton.disabled = true;
-    
-    // Open WhatsApp
-    window.open(whatsappURL, '_blank');
-    
-    // Show success message
-    setTimeout(() => {
-        showNotification('WhatsApp opened! Please send the message to complete your inquiry.', 'success');
-        form.reset();
-        
-        // Remove focused states
-        form.querySelectorAll('.form-group').forEach(group => {
-            group.classList.remove('focused');
-        });
-        
-        // Reset button
-        submitButton.textContent = originalText;
-        submitButton.disabled = false;
-    }, 1000);
+    showNotification('Form submitted successfully!', 'success');
 }
 
 // Notification system
@@ -373,7 +331,6 @@ function showNotification(message, type = 'info') {
     notification.className = `notification notification-${type}`;
     notification.textContent = message;
     
-    // Add styles
     Object.assign(notification.style, {
         position: 'fixed',
         top: '20px',
@@ -388,7 +345,6 @@ function showNotification(message, type = 'info') {
         maxWidth: '400px'
     });
     
-    // Set background color based on type
     const colors = {
         success: '#28a745',
         error: '#dc3545',
@@ -398,12 +354,10 @@ function showNotification(message, type = 'info') {
     
     document.body.appendChild(notification);
     
-    // Animate in
     requestAnimationFrame(() => {
         notification.style.transform = 'translateX(0)';
     });
     
-    // Auto remove
     setTimeout(() => {
         notification.style.transform = 'translateX(100%)';
         setTimeout(() => {
@@ -414,68 +368,15 @@ function showNotification(message, type = 'info') {
     }, 5000);
 }
 
-// Performance monitoring
-function initPerformanceMonitoring() {
-    // Monitor Core Web Vitals
-    if ('web-vital' in window) {
-        import('https://unpkg.com/web-vitals@3/dist/web-vitals.js').then(({ getCLS, getFID, getFCP, getLCP, getTTFB }) => {
-            // Log metrics only in development
-            if (window.location.hostname === 'localhost') {
-                getCLS(console.log);
-                getFID(console.log);
-                getFCP(console.log);
-                getLCP(console.log);
-                getTTFB(console.log);
-            }
-        });
-    }
-    
-    // Log page load time only in development
-    if (window.location.hostname === 'localhost') {
-        window.addEventListener('load', () => {
-            const loadTime = performance.timing.loadEventEnd - performance.timing.navigationStart;
-            console.log(`Page loaded in ${loadTime}ms`);
-        });
-    }
-}
-
-// Lazy loading for images
-function initLazyLoading() {
-    if ('IntersectionObserver' in window) {
-        const imageObserver = new IntersectionObserver((entries) => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    const img = entry.target;
-                    img.src = img.dataset.src;
-                    img.classList.remove('lazy');
-                    imageObserver.unobserve(img);
-                }
-            });
-        });
-        
-        document.querySelectorAll('img[data-src]').forEach(img => {
-            imageObserver.observe(img);
-        });
-    }
-}
-
 // Initialize everything when DOM is ready
 document.addEventListener('DOMContentLoaded', function() {
-    // Core functionality
     typeWriter();
     initSmoothScrolling();
     initNavigationEffects();
     initScrollAnimations();
     initMobileNavigation();
     initFormEnhancements();
-    initLazyLoading();
     
-    // Performance monitoring (development only)
-    if (window.location.hostname === 'localhost') {
-        initPerformanceMonitoring();
-    }
-    
-    // Add loading class to body for fade-in effect
     document.body.classList.add('loading');
 });
 
@@ -486,18 +387,16 @@ window.addEventListener('beforeunload', () => {
     }
 });
 
-// Service Worker registration for PWA capabilities
+// Service Worker registration
 if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
         navigator.serviceWorker.register('/sw.js')
             .then(registration => {
-                // Only log in development
                 if (window.location.hostname === 'localhost') {
                     console.log('SW registered: ', registration);
                 }
             })
             .catch(registrationError => {
-                // Only log in development
                 if (window.location.hostname === 'localhost') {
                     console.log('SW registration failed: ', registrationError);
                 }
