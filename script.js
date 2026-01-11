@@ -255,8 +255,15 @@ async function handleFormSubmit(e) {
     e.preventDefault();
     
     const form = e.target;
-    const formData = new FormData(form);
     const submitButton = form.querySelector('button[type="submit"]');
+    
+    // Check if this is the WhatsApp form
+    if (form.id === 'whatsapp-form') {
+        handleWhatsAppFormSubmit(form, submitButton);
+        return;
+    }
+    
+    const formData = new FormData(form);
     
     // Validate all fields
     const inputs = form.querySelectorAll('input[required], textarea[required]');
@@ -296,6 +303,68 @@ async function handleFormSubmit(e) {
         submitButton.textContent = originalText;
         submitButton.disabled = false;
     }
+}
+
+// WhatsApp form submission handler
+function handleWhatsAppFormSubmit(form, submitButton) {
+    // Validate required fields
+    const nameInput = form.querySelector('#name');
+    const emailInput = form.querySelector('#email');
+    
+    if (!validateField(nameInput) || !validateField(emailInput)) {
+        showNotification('Please fill in all required fields correctly.', 'error');
+        return;
+    }
+    
+    // Get form data
+    const formData = new FormData(form);
+    const name = formData.get('name');
+    const email = formData.get('email');
+    const website = formData.get('website') || 'Not provided';
+    const service = formData.get('service') || 'Not specified';
+    const message = formData.get('message') || 'No additional details provided';
+    
+    // Format WhatsApp message
+    const whatsappMessage = `🌟 *New SEO Inquiry* 🌟
+
+👤 *Name:* ${name}
+📧 *Email:* ${email}
+🌐 *Website:* ${website}
+🎯 *Service Needed:* ${service}
+
+💬 *Message:*
+${message}
+
+---
+Sent from SEO Portfolio Website`;
+    
+    // Encode message for URL
+    const encodedMessage = encodeURIComponent(whatsappMessage);
+    const whatsappNumber = '923224778268'; // Your WhatsApp number
+    const whatsappURL = `https://wa.me/${whatsappNumber}?text=${encodedMessage}`;
+    
+    // Show loading state
+    const originalText = submitButton.textContent;
+    submitButton.textContent = 'Opening WhatsApp...';
+    submitButton.disabled = true;
+    
+    // Open WhatsApp
+    window.open(whatsappURL, '_blank');
+    
+    // Show success message
+    setTimeout(() => {
+        showNotification('WhatsApp opened! Please send the message to complete your inquiry.', 'success');
+        form.reset();
+        
+        // Remove focused states
+        form.querySelectorAll('.form-group').forEach(group => {
+            group.classList.remove('focused');
+        });
+        
+        // Reset button
+        submitButton.textContent = originalText;
+        submitButton.disabled = false;
+    }, 1000);
 }
 
 // Notification system
